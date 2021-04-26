@@ -1,4 +1,5 @@
 import quopri
+from gvg_framework.reqlib import GetReqMan, PostReqMan
 
 
 class PageNotFound404:
@@ -18,6 +19,22 @@ class GvgFramework:
 
         if not l_path.endswith('/'):
             l_path = f'{l_path}/'
+
+        ldic_req_data = {}
+        ls_req_meth = environ['REQUEST_METHOD']
+        ldic_req_data['req_meth'] = ls_req_meth
+
+        if ls_req_meth == 'POST':
+            ldic_data = PostReqMan().get_req_dict(environ)
+            ldic_data = self.decode_value(ldic_data)
+            ldic_req_data['dic_data'] = ldic_data
+        if ls_req_meth == 'GET':
+            ldic_data = GetReqMan().get_req_dict(environ)
+            ldic_req_data['dic_data'] = ldic_data
+
+        print(f'Пришел метод: <{ls_req_meth}>.')
+        print(f'Пришли парам: <{ldic_data}>.')
+
 
         # Отработка паттерна page controller
         if l_path in self.m_lst_routes:
