@@ -8,7 +8,7 @@ class Index:
 
 class About:
     def __call__(self, i_req):
-        return '200 OK', 'about'
+        return '200 OK', render('about.html')
 
 
 class NotFound404:
