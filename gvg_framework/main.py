@@ -1,5 +1,8 @@
 import quopri
 from gvg_framework.reqlib import GetReqMan, PostReqMan
+from patterns.creational_patterns import Logger
+
+LOGGER = Logger('main')
 
 
 class PageNotFound404:
@@ -32,21 +35,18 @@ class GvgFramework:
             ldic_data = GetReqMan().get_req_dict(environ)
             ldic_req_data['dic_data'] = ldic_data
 
-        print(f'Пришел метод: <{ls_req_meth}>.')
-        print(f'Пришли парам: <{ldic_data}>.')
-
+        LOGGER.log(f'GvgFramework._call_.DATA: <{ls_req_meth}>, <{ldic_data}>.')
 
         # Отработка паттерна page controller
         if l_path in self.m_lst_routes:
             lo_run_view = self.m_lst_routes[l_path]
         else:
             lo_run_view = PageNotFound404()
-        ldic_reqs = {}
         # Отработка паттерна front controller
         for lo_run_front in self.m_lst_fronts:
-            lo_run_front(ldic_reqs)
-        # запуск контроллера с передачей объекта ldic_reqs
-        l_code, l_body = lo_run_view(ldic_reqs)
+            lo_run_front(ldic_req_data)
+        # запуск контроллера с передачей объекта ldic_req_data
+        l_code, l_body = lo_run_view(ldic_req_data)
         start_response(l_code, [('Content-Type', 'text/html')])
         return [l_body.encode('utf-8')]
 
