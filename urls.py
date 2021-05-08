@@ -13,14 +13,3 @@ def other_front(i_req):
 
 
 glst_fronts = [secret_front, other_front]
-
-gdic_routes = {
-    '/': Index(),
-    '/about/': About(),
-    '/study_programs/': StudyPrograms(),
-    '/courses-list/': CoursesList(),
-    '/create-course/': CreateCourse(),
-    '/create-category/': CreateCategory(),
-    '/category-list/': CategoryList(),
-    '/copy-course/': CopyCourse()
-}

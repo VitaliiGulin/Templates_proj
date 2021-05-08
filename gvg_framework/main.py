@@ -58,3 +58,27 @@ class GvgFramework:
             val_decode_str = quopri.decodestring(val).decode('UTF-8')
             l_new_data[k] = val_decode_str
         return l_new_data
+
+
+# Другие виды Application.
+# Одновременно, и наследование, и композиция излишни.
+# Тут наследование я убрал.
+class GVGDebugApplication():
+    def __init__(self, io_routes, io_fronts):
+        self.m_app = GvgFramework(io_routes, io_fronts)
+
+    def __call__(self, i_env, i_start_res):
+        print('GVG.DEBUG!')
+        print(i_env)
+        return self.m_app(i_env, i_start_res)
+
+
+# А тут я композицию убрал.
+class GVGFakeApplication(GvgFramework):
+    def __init__(self, io_routes, io_fronts):
+        super().__init__(io_routes, io_fronts)
+
+    def __call__(self, env, start_response):
+        start_response('200 OK', [('Content-Type', 'text/html')])
+        return [b'Hello from Fake']
+

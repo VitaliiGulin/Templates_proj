@@ -1,8 +1,10 @@
 from wsgiref.simple_server import make_server
-from gvg_framework.main import GvgFramework
-from urls import gdic_routes, glst_fronts
+from gvg_framework.main import GvgFramework,\
+    GVGDebugApplication, GVGFakeApplication
+from urls import glst_fronts
+from views import gdic_routes
 
-G_APP = GvgFramework(gdic_routes, glst_fronts)
+G_APP = GVGDebugApplication(gdic_routes, glst_fronts)
 #print('gdic_routes', gdic_routes)
 #print('glst_fronts', glst_fronts)
 

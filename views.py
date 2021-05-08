@@ -2,35 +2,46 @@ from datetime import date
 
 from gvg_framework.templator import render
 from patterns.creational_patterns import Engine, Logger
+from patterns.structural_patterns import GvgRoute, GvgDebug
 
 GSITE = Engine()
 LOGGER = Logger('views')
 
+gdic_routes = {}
 
+
+@GvgRoute(idic_routes=gdic_routes, i_url='/')
 class Index:
+    @GvgDebug(i_name='Index')
     def __call__(self, request):
         return '200 OK', render('index.html', objects_list=GSITE.m_categories)
 
 
+@GvgRoute(idic_routes=gdic_routes, i_url='/about/')
 class About:
+    @GvgDebug(i_name='About')
     def __call__(self, i_req):
         return '200 OK', render('about.html')
 
 
 # контроллер - Расписания
+@GvgRoute(idic_routes=gdic_routes, i_url='/study_programs/')
 class StudyPrograms:
+    @GvgDebug(i_name='StudyPrograms')
     def __call__(self, request):
         return '200 OK', render('study-programs.html', data=date.today())
 
 
 # контроллер 404
 class NotFound404:
+    @GvgDebug(i_name='NotFound404')
     def __call__(self, request):
         return '404 WHAT', '404 PAGE Not Found'
 
 
-# контроллер - список курсов
+@GvgRoute(idic_routes=gdic_routes, i_url='/courses-list/')
 class CoursesList:
+    @GvgDebug(i_name='CoursesList')
     def __call__(self, i_req):
         LOGGER.log(f'CoursesList.__call__.Input: <{i_req}>.')
         try:
@@ -44,9 +55,11 @@ class CoursesList:
 
 
 # контроллер - создать курс
+@GvgRoute(idic_routes=gdic_routes, i_url='/create-course/')
 class CreateCourse:
     s_category_id = -1
 
+    @GvgDebug(i_name='CreateCourse')
     def __call__(self, i_req):
         if i_req['req_meth'] == 'POST':
             ldic_dat = i_req['dic_data']
@@ -74,7 +87,9 @@ class CreateCourse:
 
 
 # контроллер - создать категорию
+@GvgRoute(idic_routes=gdic_routes, i_url='/create-category/')
 class CreateCategory:
+    @GvgDebug(i_name='CreateCategory')
     def __call__(self, i_req):
         LOGGER.log(f'CreateCategory.__call__.Input: <{i_req}>.')
 
@@ -103,14 +118,18 @@ class CreateCategory:
 
 
 # контроллер - список категорий
+@GvgRoute(idic_routes=gdic_routes, i_url='/category-list/')
 class CategoryList:
+    @GvgDebug(i_name='CategoryList')
     def __call__(self, i_req):
         LOGGER.log('Список категорий')
         return '200 OK', render('category_list.html', objects_list=GSITE.m_categories)
 
 
 # контроллер - копировать курс
+@GvgRoute(idic_routes=gdic_routes, i_url='/copy-course/')
 class CopyCourse:
+    @GvgDebug(i_name='CopyCourse')
     def __call__(self, i_req):
         LOGGER.log(f'CopyCourse.__call__.Input: <{i_req}>.')
 
