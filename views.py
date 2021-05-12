@@ -3,9 +3,13 @@ from datetime import date
 from gvg_framework.templator import render
 from patterns.creational_patterns import Engine, Logger
 from patterns.structural_patterns import GvgRoute, GvgDebug
+from patterns.behavioral_patterns import EmailNotifier, SmsNotifier, \
+    TemplateView, ListView, CreateView, BaseSerializer
 
 GSITE = Engine()
 LOGGER = Logger('views')
+email_notifier = EmailNotifier()
+sms_notifier = SmsNotifier()
 
 gdic_routes = {}
 
@@ -71,6 +75,8 @@ class CreateCourse:
             if self.s_category_id != -1:
                 lo_cat = GSITE.find_category_by_id(int(self.s_category_id))
                 lo_crs = GSITE.create_course('record', l_crs_name, lo_cat)
+                lo_crs.m_observers.append(email_notifier)
+                lo_crs.m_observers.append(sms_notifier)
                 GSITE.m_courses.append(lo_crs)
 
             return '200 OK', render('course_list.html', objects_list=lo_cat.m_courses,
@@ -152,3 +158,48 @@ class CopyCourse:
             return '200 OK', render('course_list.html', objects_list=GSITE.m_courses)
         except KeyError:
             return '200 OK', 'No courses have been added yet'
+
+
+@GvgRoute(idic_routes=gdic_routes, i_url='/student-list/')
+class StudentListView(ListView):
+    slst_dat = GSITE.m_students
+    s_template_fn = 'student_list.html'
+
+
+@GvgRoute(idic_routes=gdic_routes, i_url='/create-student/')
+class StudentCreateView(CreateView):
+    s_template_fn = 'create_student.html'
+
+    def create_obj(self, i_dat: dict):
+        lb_name = i_dat['name']
+        ls_name = GSITE.decode_value(lb_name)
+        l_new_obj = GSITE.create_user('student', ls_name)
+        GSITE.m_students.append(l_new_obj)
+
+
+@GvgRoute(idic_routes=gdic_routes, i_url='/add-student/')
+class AddStudentByCourseCreateView(CreateView):
+    s_template_fn = 'add_student.html'
+
+    def get_context_data(self):
+        l_ctx = super().get_context_data()
+        l_ctx['courses'] = GSITE.m_courses
+        l_ctx['students'] = GSITE.m_students
+        return l_ctx
+
+    def create_obj(self, i_dat: dict):
+        l_crs_nm = i_dat['course_name']
+        l_crs_nm = GSITE.decode_value(l_crs_nm)
+        lo_crs = GSITE.get_course(l_crs_nm)
+        l_std_nm = i_dat['student_name']
+        l_std_nm = GSITE.decode_value(l_std_nm)
+        lo_std = GSITE.get_student(l_std_nm)
+        lo_crs.add_student(lo_std)
+
+
+@GvgRoute(idic_routes=gdic_routes, i_url='/api/')
+class CourseApi:
+    @GvgDebug(i_name='CourseApi')
+    def __call__(self, i_req):
+        return '200 OK', BaseSerializer(GSITE.m_courses).save()
+

@@ -1,5 +1,6 @@
 import copy
 import quopri
+from patterns.behavioral_patterns import ConsoleWriter, Subject
 
 
 class SingletonByName(type):
@@ -22,12 +23,13 @@ class SingletonByName(type):
 
 
 class Logger(metaclass=SingletonByName):
-
-    def __init__(self, i_name):
+    def __init__(self, i_name, i_writer=ConsoleWriter()):
         self.m_name = i_name
+        self.m_writer = i_writer
 
-    def log(self, text):
-        print(f'log({self.m_name})---> {text}')
+    def log(self, i_text):
+        l_text = f'log({self.m_name})---> {i_text}'
+        self.m_writer.write(l_text)
 
 
 LOGGER = Logger('cre_pat')
@@ -35,6 +37,8 @@ LOGGER = Logger('cre_pat')
 
 # абстрактный пользователь
 class User:
+    def __init__(self, name):
+        self.name = name
     pass
 
 
@@ -45,7 +49,9 @@ class Teacher(User):
 
 # студент
 class Student(User):
-    pass
+    def __init__(self, name):
+        self.courses = []
+        super().__init__(name)
 
 
 # порождающий паттерн Абстрактная фабрика - фабрика пользователей
@@ -57,8 +63,8 @@ class UserFactory:
 
     # порождающий паттерн Фабричный метод
     @classmethod
-    def create(cls, i_type):
-        return cls.s_types[i_type]()
+    def create(cls, type_, name):
+        return cls.s_types[type_](name)
 
 
 # порождающий паттерн Прототип - Курс
@@ -69,11 +75,21 @@ class CoursePrototype:
         #return copy.deepcopy(self)
 
 
-class Course(CoursePrototype):
+class Course(CoursePrototype, Subject):
     def __init__(self, i_name, i_cat):
         self.name = i_name
         self.m_category = i_cat
         self.m_category.m_courses.append(self)
+        self.students = []
+        super().__init__()
+
+    def __getitem__(self, item):
+        return self.students[item]
+
+    def add_student(self, student: Student):
+        self.students.append(student)
+        student.courses.append(self)
+        self.notify()
 
 
 # Интерактивный курс
@@ -120,8 +136,8 @@ class Engine:
         self.m_categories = []
 
     @staticmethod
-    def create_user(i_type):
-        return UserFactory.create(i_type)
+    def create_user(i_type, name):
+        return UserFactory.create(i_type, name)
 
     @staticmethod
     def create_category(i_name):
@@ -140,11 +156,16 @@ class Engine:
     def create_course(i_type, i_name, i_cat):
         return CourseFactory.create(i_type, i_name, i_cat)
 
-    def get_course(self, i_name):
+    def get_course(self, i_name) -> Course:
         for rec in self.m_courses:
             if rec.name == i_name:
                 return rec
         return None
+
+    def get_student(self, i_name) -> Student:
+        for rec in self.m_students:
+            if rec.name == i_name:
+                return rec
 
     @staticmethod
     def decode_value(val):

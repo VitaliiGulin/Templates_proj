@@ -68,8 +68,8 @@ class GVGDebugApplication():
         self.m_app = GvgFramework(io_routes, io_fronts)
 
     def __call__(self, i_env, i_start_res):
-        print('GVG.DEBUG!')
-        print(i_env)
+        #print('GVG.DEBUG!')
+        #print(i_env)
         return self.m_app(i_env, i_start_res)
 
 
