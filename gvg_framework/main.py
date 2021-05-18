@@ -1,6 +1,6 @@
 import quopri
 from gvg_framework.reqlib import GetReqMan, PostReqMan
-from patterns.creational_patterns import Logger
+from patterns.creational import Logger
 
 LOGGER = Logger('main')
 

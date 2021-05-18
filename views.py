@@ -1,15 +1,19 @@
 from datetime import date
 
 from gvg_framework.templator import render
-from patterns.creational_patterns import Engine, Logger
+from patterns.creational import Engine, Logger
 from patterns.structural_patterns import GvgRoute, GvgDebug
 from patterns.behavioral_patterns import EmailNotifier, SmsNotifier, \
     TemplateView, ListView, CreateView, BaseSerializer
+from patterns.archit_sys_uow import UnitOfWork
+from patterns.archit_sys_mappers import MapperRegistry
 
 GSITE = Engine()
 LOGGER = Logger('views')
 email_notifier = EmailNotifier()
 sms_notifier = SmsNotifier()
+UnitOfWork.new_current()
+UnitOfWork.get_current().set_mapper_registry(MapperRegistry)
 
 gdic_routes = {}
 
@@ -162,9 +166,11 @@ class CopyCourse:
 
 @GvgRoute(idic_routes=gdic_routes, i_url='/student-list/')
 class StudentListView(ListView):
-    slst_dat = GSITE.m_students
     s_template_fn = 'student_list.html'
 
+    def get_queryset(self):
+        mapper = MapperRegistry.get_mapper_by_nam('student')
+        return mapper.all()
 
 @GvgRoute(idic_routes=gdic_routes, i_url='/create-student/')
 class StudentCreateView(CreateView):
@@ -175,6 +181,8 @@ class StudentCreateView(CreateView):
         ls_name = GSITE.decode_value(lb_name)
         l_new_obj = GSITE.create_user('student', ls_name)
         GSITE.m_students.append(l_new_obj)
+        l_new_obj.mark_for_ins()
+        UnitOfWork.get_current().commit()
 
 
 @GvgRoute(idic_routes=gdic_routes, i_url='/add-student/')
